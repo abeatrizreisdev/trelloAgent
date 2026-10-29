@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trello AI Workspace • Pro Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #06080F;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.12), transparent),
+        radial-gradient(ellipse 60% 50% at 100% 100%, rgba(59, 130, 246, 0.08), transparent);
+      font-size: 16px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.5);
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 0.8);
+    }
+
+    .glass-surface {
+      background: rgba(13, 18, 32, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card-preview {
+      background: linear-gradient(180deg, rgba(20, 28, 48, 0.85) 0%, rgba(11, 16, 28, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 25px -5px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Tipografia confortável e legível */
+    .prose-chat strong {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .prose-chat p {
+      margin-bottom: 0.75rem;
+      font-size: 1.025rem;
+      line-height: 1.65;
+    }
+
+    .prose-chat p:last-child {
+      margin-bottom: 0;
+    }
+
+    .prose-chat ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .prose-chat ul li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.975rem;
+      line-height: 1.55;
+    }
+
+    .prose-chat ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0.4rem;
+      color: #34d399;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .prose-chat a {
+      color: #34d399;
+      text-decoration: underline;
+      font-weight: 600;
+      text-underline-offset: 3px;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anim-enter {
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+
+<body
+  class="text-slate-100 h-screen flex flex-col font-sans overflow-hidden antialiased selection:bg-brand-500/20 selection:text-brand-300">
+
+  <!-- Header Limpo e sem botões fora de hora -->
+  <header
+    class="h-16 border-b border-white/[0.08] bg-[#06080F]/90 backdrop-blur-xl px-6 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3.5">
+      <div
+        class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <rect width="18" height="18" x="3" y="3" rx="3" ry="3" />
+          <path d="M7 7h3v10H7zM14 7h3v6h-3z" />
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-base font-bold text-white tracking-tight">Trello Assistant</span>
+          <span
+            class="text-[11px] font-mono tracking-wider px-2 py-0.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 font-semibold">ONLINE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button onclick="limparChat()"
+        class="text-xs font-medium text-slate-400 hover:text-rose-400 bg-white/[0.03] hover:bg-rose-950/20 border border-white/[0.08] hover:border-rose-900/40 px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Limpar Conversa
+      </button>
+    </div>
+  </header>
+
+  <!-- Corpo Principal -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Sidebar Compacta e Legível -->
+    <aside
+      class="w-72 border-r border-white/[0.08] bg-[#06080F]/60 backdrop-blur-md hidden md:flex flex-col justify-between p-5 text-sm shrink-0 select-none">
+      <div class="space-y-6">
+
+        <!-- Workflow Operacional -->
+        <div>
+          <span class="text-xs font-mono uppercase font-bold text-slate-400 tracking-wider">Fluxo do Card</span>
+          <div class="mt-3 p-3.5 rounded-xl glass-surface space-y-3 text-sm">
+            <div class="flex items-center justify-between text-slate-200">
+              <span class="flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-brand-400"></span> 1. Proposta
+              </span>
+              <span class="text-xs font-mono text-slate-400">Gemini</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-200">
+              <span class="flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span> 2. Revisão
+              </span>
+              <span class="text-xs font-mono text-slate-400">Você</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-200">
+              <span class="flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span> 3. Criar
+              </span>
+              <span class="text-xs font-mono text-slate-400">Trello API</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Atalhos Rápidos -->
+        <div>
+          <span class="text-xs font-mono uppercase font-bold text-slate-400 tracking-wider">Ações
+            Pré-configuradas</span>
+          <div class="mt-3 space-y-2">
+            <button onclick="copiarTemplateCard()"
+              class="w-full text-left p-3 rounded-xl glass-surface hover:border-brand-500/40 text-slate-300 hover:text-white transition flex items-center justify-between group">
+              <span class="font-medium text-sm">Colar Template /card</span>
+              <span class="font-mono text-xs text-brand-400 group-hover:translate-x-0.5 transition-transform">↵</span>
+            </button>
+            <button onclick="preencherInput('novo card sobre')"
+              class="w-full text-left p-3 rounded-xl glass-surface hover:border-brand-500/40 text-slate-300 hover:text-white transition flex items-center justify-between group">
+              <span class="font-medium text-sm">+ Iniciar Novo Card</span>
+              <span class="font-mono text-xs text-slate-500 group-hover:text-brand-400">auto</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé Sidebar -->
+      <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-slate-400">
+        <div class="flex items-center gap-2 font-semibold text-slate-200 mb-1">
+          <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+          Conexão Segura
+        </div>
+        <p class="text-[12px] text-slate-400 leading-relaxed">Etiquetas, datas ISO e checklists sincronizados
+          diretamente com o seu quadro.</p>
+      </div>
+    </aside>
+
+    <!-- Área de Chat Principal -->
+    <div class="flex-1 flex flex-col h-full relative">
+      <main id="chat-container" class="flex-1 overflow-y-auto px-5 py-7 md:px-10 space-y-6 max-w-4xl w-full mx-auto">
+
+        <!-- Welcome Message -->
+        <div class="flex items-start gap-4 anim-enter">
+          <div
+            class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-lg">
+            AI
+          </div>
+          <div
+            class="glass-surface rounded-2xl rounded-tl-sm p-5 text-[15px] text-slate-200 leading-relaxed max-w-2xl shadow-xl">
+            <p class="font-bold text-white mb-1.5 text-base flex items-center gap-2">
+              Workspace Conectado
+              <span class="w-2 h-2 rounded-full bg-brand-400"></span>
+            </p>
+            <p class="text-slate-300 leading-relaxed">
+              Diga o que você precisa fazer ou cole um bloco de demanda estruturada. Quando a IA desenhar o cartão, o
+              botão de <strong>Aprovar e Criar</strong> ficará disponível imediatamente.
+            </p>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Barra de Ação Contextual Flutuante (Aparece quando há card pendente) -->
+      <div id="floating-approval-bar" class="hidden max-w-4xl w-full mx-auto px-5 mb-2 transition-all duration-300">
+        <div
+          class="p-3.5 rounded-xl glass-card-preview flex items-center justify-between gap-4 border border-brand-500/40">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+            <span class="text-sm font-semibold text-white">Proposta de cartão pronta para aprovação</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="enviarComando('pode criar no trello')"
+              class="bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(16,185,129,0.35)] active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>Aprovar e Criar no Trello</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar Confortável -->
+      <footer class="p-4 md:p-6 bg-gradient-to-t from-[#06080F] via-[#06080F]/95 to-transparent">
+        <div class="max-w-4xl mx-auto space-y-2">
+
+          <!-- Chips Rápidos acima do input (onde faz sentido) -->
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-slate-400 font-medium">Sugestões rápidas:</span>
+            <button onclick="copiarTemplateCard()"
+              class="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition">
+              + Template /card
+            </button>
+            <button onclick="preencherInput('novo card sobre')"
+              class="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition">
+              + Novo Card
+            </button>
+            <button onclick="enviarComando('mudar coluna para Amanhã')"
+              class="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition">
+              Coluna: Amanhã
+            </button>
+          </div>
+
+          <form id="chat-form"
+            class="relative glass-surface rounded-2xl p-3 transition-all focus-within:border-brand-500/50 focus-within:ring-2 focus-within:ring-brand-500/10 shadow-2xl">
+
+            <textarea id="user-input" rows="2"
+              placeholder="Digite sua demanda, instrução de ajuste ou cole o bloco /card... (Enter envia, Shift+Enter pula linha)"
+              class="w-full bg-transparent border-0 px-3 py-1.5 text-base focus:ring-0 focus:outline-none text-white placeholder-slate-500 resize-none max-h-48 disabled:opacity-50 font-sans leading-relaxed"
+              autocomplete="off"></textarea>
+
+            <div class="flex items-center justify-between pt-2.5 px-3 border-t border-white/[0.06] mt-1.5">
+              <span class="text-xs text-slate-400 hidden sm:inline font-mono">
+                <kbd class="px-2 py-0.5 rounded bg-white/10 text-slate-200 text-xs">Enter</kbd> Enviar • <kbd
+                  class="px-2 py-0.5 rounded bg-white/10 text-slate-200 text-xs">Shift+Enter</kbd> Quebrar Linha
+              </span>
+
+              <button id="send-btn" type="submit"
+                class="bg-brand-500 hover:bg-brand-400 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-bold px-5 py-2 rounded-xl text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(16,185,129,0.25)] active:scale-95">
+                <span>Enviar</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </footer>
+    </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+    const container = document.getElementById("chat-container");
+    const approvalBar = document.getElementById("floating-approval-bar");
+
+    input.addEventListener("input", function () {
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 180) + "px";
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event("submit"));
+      }
+    });
+
+    function scrollBottom() {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+
+    function isCardProposal(texto) {
+      return (
+        (texto.includes("Coluna:") || texto.includes("Coluna sugerida:") || texto.includes("Pré-visualização do Card")) &&
+        (texto.includes("Checklist") || texto.includes("Posso criar o cartão"))
+      );
+    }
+
+    function renderizarCardPreview(texto) {
+      const colunaMatch = texto.match(/Coluna(?: sugerida)?\*\*?:?\s*([^\n\r]+)/i);
+      const tituloMatch = texto.match(/T[íi]tulo(?: sugerido)?\*\*?:?\s*([^\n\r]+)/i);
+      const dataMatch = texto.match(/(?:Data de entrega|Prazo)[^:]*\*\*?:?\s*([^\n\r]+)/i);
+      const etiquetasMatch = texto.match(/Etiquetas?(?: sugeridas)?\*\*?:?\s*([^\n\r]+)/i);
+
+      const coluna = colunaMatch ? colunaMatch[1].replace(/[*_\[\]]/g, "").trim() : "Esta Semana";
+      const titulo = tituloMatch ? tituloMatch[1].replace(/[*_\[\]]/g, "").trim() : "Demanda Estruturada";
+      const prazo = dataMatch ? dataMatch[1].replace(/[*_]/g, "").trim() : "Sem prazo";
+      const etiquetas = etiquetasMatch ? etiquetasMatch[1].replace(/[*_]/g, "").trim() : "Geral";
+
+      return `
+        <div class="glass-card-preview rounded-2xl p-6 my-2 text-slate-100 border border-brand-500/40 shadow-2xl">
+          <div class="flex items-center justify-between pb-3.5 border-b border-white/[0.1]">
+            <span class="text-xs font-mono uppercase font-bold text-brand-300 bg-brand-500/20 px-3 py-1 rounded-md border border-brand-500/30">
+              Coluna: ${coluna}
+            </span>
+            <span class="text-xs font-mono text-amber-300 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-md flex items-center gap-1.5 font-semibold">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Prazo: dia ${prazo}
+            </span>
+          </div>
+
+          <div class="mt-4">
+            <h4 class="text-lg font-bold text-white tracking-tight leading-snug">${titulo}</h4>
+            <div class="flex flex-wrap gap-2 mt-2.5">
+              <span class="text-xs font-semibold bg-purple-500/20 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
+                ${etiquetas}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-white/[0.08] text-sm text-slate-200 prose-chat leading-relaxed">
+            ${marked.parse(texto)}
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-white/[0.1] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span class="text-xs text-slate-400">Revise os detalhes acima antes de confirmar.</span>
+            <button onclick="enviarComando('pode criar no trello')" class="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Aprovar & Criar no Trello</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function addMessage(texto, autor) {
+      const isUser = autor === "user";
+      const div = document.createElement("div");
+      div.className = `flex items-start gap-4 anim-enter ${isUser ? "flex-row-reverse" : ""}`;
+
+      const badge = document.createElement("div");
+      badge.className = `w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-lg ${isUser
+          ? "bg-blue-600/30 border border-blue-500/50 text-blue-200"
+          : "bg-brand-500/10 border border-brand-500/30 text-brand-300"
+        }`;
+      badge.textContent = isUser ? "EU" : "AI";
+
+      const bolha = document.createElement("div");
+      bolha.className = `rounded-2xl p-5 text-base leading-relaxed max-w-2xl shadow-xl ${isUser
+          ? "bg-blue-600/20 border border-blue-500/40 text-blue-50 rounded-tr-sm whitespace-pre-wrap font-medium"
+          : "glass-surface text-slate-200 rounded-tl-sm prose-chat"
+        }`;
+
+      if (isUser) {
+        bolha.innerHTML = texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      } else if (isCardProposal(texto)) {
+        bolha.innerHTML = renderizarCardPreview(texto);
+        approvalBar.classList.remove("hidden"); // Ativa a barra inferior
+      } else {
+        bolha.innerHTML = marked.parse(texto);
+        if (texto.includes("🎉")) {
+          approvalBar.classList.add("hidden"); // Oculta ao confirmar
+        }
+      }
+
+      div.appendChild(badge);
+      div.appendChild(bolha);
+      container.appendChild(div);
+      scrollBottom();
+    }
+
+    function showLoading() {
+      const div = document.createElement("div");
+      div.id = "loading-bubble";
+      div.className = "flex items-start gap-4 anim-enter";
+      div.innerHTML = `
+        <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center font-mono font-bold text-sm shrink-0 animate-pulse">AI</div>
+        <div class="glass-surface rounded-2xl rounded-tl-sm p-4 text-sm text-slate-300 flex items-center gap-3">
+          <div class="flex gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style="animation-delay: 0ms"></span>
+            <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style="animation-delay: 150ms"></span>
+            <span class="w-2 h-2 rounded-full bg-brand-400 animate-bounce" style="animation-delay: 300ms"></span>
+          </div>
+          <span class="font-medium text-slate-200">Consultando Trello e estruturando demanda...</span>
+        </div>
+      `;
+      container.appendChild(div);
+      scrollBottom();
+    }
+
+    function removeLoading() {
+      const el = document.getElementById("loading-bubble");
+      if (el) el.remove();
+    }
+
+    async function enviar(msg) {
+      if (!msg.trim()) return;
+      addMessage(msg, "user");
+
+      input.value = "";
+      input.style.height = "auto";
+      input.disabled = true;
+      sendBtn.disabled = true;
+
+      showLoading();
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mensagem: msg })
+        });
+
+        const data = await res.json();
+        removeLoading();
+
+        if (data.erro) {
+          addMessage(`❌ **Erro retornado:** \`${data.erro}\``, "ia");
+        } else {
+          addMessage(data.resposta || "Nenhuma resposta obtida.", "ia");
+        }
+      } catch (err) {
+        removeLoading();
+        addMessage(`⚠️ **Erro de conexão com o servidor local:** ${err.message}`, "ia");
+      } finally {
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    function enviarComando(cmd) {
+      enviar(cmd);
+    }
+
+    function limparChat() {
+      container.innerHTML = `
+        <div class="flex items-start gap-4 anim-enter">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-300 flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-lg">
+            AI
+          </div>
+          <div class="glass-surface rounded-2xl rounded-tl-sm p-5 text-[15px] text-slate-200 leading-relaxed max-w-2xl">
+            <p class="font-bold text-white mb-1.5 text-base">Conversa Reiniciada</p>
+            <p class="text-slate-300">Envie uma nova mensagem ou use as sugestões rápidas acima da caixa de digitação.</p>
+          </div>
+        </div>
+      `;
+      approvalBar.classList.add("hidden");
+    }
+
+    function copiarTemplateCard() {
+      const template = `/card\nColuna: Amanhã\nTítulo: [Projeto] Nome da Tarefa\nPrazo: 2026-10-27\nEtiquetas: Desenvolvimento / Frontend / Backend\nDescrição:\n**Objetivo:** O que precisa ser feito.\n**Contexto:** Motivo e impacto da demanda.\nChecklist:\n- Tarefa 1\n- Tarefa 2\n- Tarefa 3`;
+      input.value = template;
+      input.dispatchEvent(new Event("input"));
+      input.focus();
+    }
+
+    function preencherInput(texto) {
+      input.value = texto + " ";
+      input.dispatchEvent(new Event("input")); // ajusta a altura automática do textarea
+      input.focus();
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      enviar(input.value);
+    });
+  </script>
+</body>
+
+</html>
