@@ -365,7 +365,7 @@
 
     // Markdown -> HTML sanitizado (bloqueia scripts e atributos on* vindos do modelo).
     function markdownSeguro(texto) {
-      const html = DOMPurify.sanitize(marked.parse(texto), { ADD_ATTR: ["target"] });
+      const html = DOMPurify.sanitize(marked.parse(texto, { breaks: true }), { ADD_ATTR: ["target"] });
       return html.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
     }
 
@@ -377,14 +377,14 @@
     }
 
     function renderizarCardPreview(texto) {
-      const colunaMatch = texto.match(/Coluna(?: sugerida)?\*\*?:?\s*([^\n\r]+)/i);
-      const tituloMatch = texto.match(/T[íi]tulo(?: sugerido)?\*\*?:?\s*([^\n\r]+)/i);
-      const dataMatch = texto.match(/(?:Data de entrega|Prazo)[^:]*\*\*?:?\s*([^\n\r]+)/i);
-      const etiquetasMatch = texto.match(/Etiquetas?(?: sugeridas)?\*\*?:?\s*([^\n\r]+)/i);
+      const colunaMatch = texto.match(/Coluna(?: sugerida)?\**\s*:\s*\**\s*([^\n\r]+)/i);
+      const tituloMatch = texto.match(/T[íi]tulo(?: sugerido)?\**\s*:\s*\**\s*([^\n\r]+)/i);
+      const dataMatch = texto.match(/(?:Data de entrega|Prazo)[^:\n]*:\s*\**\s*([^\n\r]+)/i);
+      const etiquetasMatch = texto.match(/Etiquetas?(?: sugeridas)?\**\s*:\s*\**\s*([^\n\r]+)/i);
 
       const coluna = escaparHTML(colunaMatch ? colunaMatch[1].replace(/[*_\[\]]/g, "").trim() : "Esta Semana");
-      const titulo = escaparHTML(tituloMatch ? tituloMatch[1].replace(/[*_\[\]]/g, "").trim() : "Demanda Estruturada");
-      const prazo = escaparHTML(dataMatch ? dataMatch[1].replace(/[*_]/g, "").trim() : "Sem prazo");
+      const titulo = escaparHTML(tituloMatch ? tituloMatch[1].replace(/[*_]/g, "").trim() : "Demanda Estruturada");
+      const prazo = escaparHTML(dataMatch ? dataMatch[1].replace(/[*_]/g, "").replace(/\s*\([^)]*\)\s*$/, "").trim() : "Sem prazo");
       const etiquetas = escaparHTML(etiquetasMatch ? etiquetasMatch[1].replace(/[*_]/g, "").trim() : "Geral");
 
       return `
@@ -395,7 +395,7 @@
             </span>
             <span class="text-xs font-mono text-amber-300 bg-amber-400/10 border border-amber-400/20 px-3 py-1 rounded-md flex items-center gap-1.5 font-semibold">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Prazo: dia ${prazo}
+              Prazo: ${prazo}
             </span>
           </div>
 

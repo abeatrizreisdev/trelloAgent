@@ -1,5 +1,20 @@
 {
   "diretrizes": "Estruturar propostas antes de criar cartões. NUNCA criar sem aprovação explícita. Manter títulos concisos e checklists técnicos.",
   "contexto_projetos": "Demandas técnicas de software, governança de TI, Mawa Hub e editais acadêmicos.",
-  "ultimos_cards_criados": []
+  "ultimos_cards_criados": [
+    {
+      "titulo": "[Bolsas Santander] Candidatura – Innovation and AI Experience in Madrid 2027",
+      "coluna": "Aguardando",
+      "prazo": "10/12/2026, 20:59",
+      "url": "https://trello.com/c/dnyc40SA",
+      "criado_em": "2026-10-29T18:46:37.987Z"
+    },
+    {
+      "titulo": "[Acadêmico] Submissão de Artigo – SESoS 2027 (ICSE Dublin)",
+      "coluna": "Aguardando",
+      "prazo": "13/11/2026, 20:59",
+      "url": "https://trello.com/c/JL5KEnE0",
+      "criado_em": "2026-10-29T18:46:19.818Z"
+    }
+  ]
 }

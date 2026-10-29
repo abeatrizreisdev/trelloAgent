@@ -2,6 +2,10 @@
 
 > Um assistente inteligente full-stack em Node.js integrado à IA generativa do Google (Gemini) e à API REST do Trello, concebido para atuar como central unificada de triagem para a minha rotina — transformando briefings, e-mails, demandas acadêmicas, vagas e editais em cartões acionáveis com prazos, etiquetas e checklists atômicos.
 
+<p align="center">
+  <img src="docs/1-preview.png" alt="Agente estruturando uma demanda em texto livre e mostrando o preview do card" width="800">
+</p>
+
 ---
 
 ## 💡 Por que este projeto existe? (O Sistema Operacional da Minha Rotina)
@@ -37,6 +41,14 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
    - **Prazos Padronizados (ISO 8601):** Extrai a data e converte para timestamps compatíveis com a API do Trello.
    - **Mapeamento de Etiquetas:** Identifica e associa as labels temáticas já cadastradas no quadro (*Estudo / Leitura*, *Desenvolvimento*, *Acadêmico*, *Geral*).
 4. **Human-in-the-Loop:** Gera um preview estruturado antes da persistência no Trello, assegurando supervisão humana para manter o quadro limpo e organizado.
+
+### Demonstração
+
+| Aprovação e criação do card | Modo rápido `/card` (sem gastar cota) |
+|---|---|
+| <img src="docs/2-criado.png" alt="Card aprovado e criado no Trello"> | <img src="docs/3-card-local.png" alt="Bloco /card processado localmente"> |
+
+> Imagens geradas com dados fictícios.
 
 ---
 
