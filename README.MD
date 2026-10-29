@@ -33,7 +33,7 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
 1. **Interpretação Semântica e Triagem:** Processa texto livre e identifica o contexto, as restrições e o núcleo acionável da tarefa.
 2. **Decomposição em Checklists Atômicos:** Desmembra demandas abstratas em uma sequência lógica de passos executáveis, eliminando a paralisia inicial de execução.
 3. **Parametrização Automática no Kanban:**
-   - **Coluna Estratégica:** Define automaticamente a lista adequada (*Esta Semana*, *Próximas Semanas*, *Aguardando*).
+   - **Coluna Estratégica:** Define automaticamente a lista adequada (*Hoje*, *Amanhã*, *Esta Semana*, *Aguardando*, *Eventos Tech*, *Caixa de entrada*), com base no prazo calculado no fuso local.
    - **Prazos Padronizados (ISO 8601):** Extrai a data e converte para timestamps compatíveis com a API do Trello.
    - **Mapeamento de Etiquetas:** Identifica e associa as labels temáticas já cadastradas no quadro (*Estudo / Leitura*, *Desenvolvimento*, *Acadêmico*, *Geral*).
 4. **Human-in-the-Loop:** Gera um preview estruturado antes da persistência no Trello, assegurando supervisão humana para manter o quadro limpo e organizado.
@@ -56,10 +56,8 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
    • Processamento imediato em memória     passos e contexto.
    • Custo Zero de cota/tokens           • Roteamento inteligente com
    • Bypass total de rate limits           fallback dinâmico de modelos:
-             │                              - gemini-3.5-flash-lite
-             │                              - gemini-3.1-flash-lite
              │                              - gemini-2.5-flash
-             │                              - gemini-3.8-flash
+             │                              - gemini-2.5-pro
              │                                     │
              └──────────────────┬──────────────────┘
                                 ▼
@@ -71,8 +69,9 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
 ```
 
 ### Destaques Técnicos de Implementação:
-* **Mecanismo Híbrido Anti-Rate Limit (HTTP 429):** APIs em camadas gratuitas possuem limites estritos de requisições por dia (RPD) e por minuto (RPM). O sistema conta com um parser local determinístico via Express/Node.js que intercepta blocos estruturados (`/card`) e realiza a chamada REST direta para o Trello, sem consumir tokens do modelo.
-* **Pool Resiliente de Modelos:** O backend orquestra chamadas com cascata de contingência, priorizando modelos com cotas de centenas de chamadas diárias (*Flash-Lite series*).
+* **Mecanismo Híbrido Anti-Rate Limit (HTTP 429):** APIs em camadas gratuitas possuem limites estritos de requisições por dia (RPD) e por minuto (RPM). O sistema conta com um parser local determinístico que intercepta mensagens iniciadas por `/card`, monta o preview e, após a confirmação, realiza a chamada REST direta para o Trello, sem consumir tokens do modelo.
+* **Pool Resiliente de Modelos:** Em caso de erro 429, 503 ou 404, o backend troca automaticamente para o próximo modelo da lista `MODELOS` em `server.mjs` (edite-a para usar os modelos com mais cota na sua conta).
+* **Segurança local:** O servidor escuta apenas em `127.0.0.1` por padrão e o conteúdo gerado pelo modelo é sanitizado (DOMPurify) antes de ser exibido.
 * **Execução Atômica via REST:** O backend consome os endpoints oficiais da Atlassian/Trello para criar o cartão, injetar a descrição formatada em Markdown, associar etiquetas e disparar a criação de checklists associados em cadeia.
 
 ---
@@ -97,8 +96,8 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
 
 ### 2. Clonando o Repositório
 ```bash
-git clone https://github.com/seu-usuario/trello-ai-agent.git
-cd trello-ai-agent
+git clone https://github.com/abeatrizreisdev/trelloAgent.git
+cd trelloAgent
 ```
 
 ### 3. Instalando as Dependências
@@ -115,15 +114,19 @@ cp .env.example .env
 Abra o arquivo `.env` e preencha com as suas chaves:
 ```ini
 PORT=3000
+HOST=127.0.0.1
+TIMEZONE=America/Sao_Paulo
 GEMINI_API_KEY=sua_chave_do_google_ai_studio
-TRELLO_API_KEY=sua_trello_api_key
-TRELLO_TOKEN=sua_trello_token
+TRELLO_KEY=sua_trello_api_key
+TRELLO_TOKEN=seu_trello_token
 TRELLO_BOARD_ID=id_do_seu_quadro_no_trello
 ```
 
+> O `memoria.json` guarda suas diretrizes e os últimos 10 cards criados (atualizado automaticamente). Revise antes de fazer commit se não quiser publicar esse histórico.
+
 ### 5. Iniciando o Servidor
 ```bash
-node server.mjs
+npm start
 ```
 Acesse `http://localhost:3000` no seu navegador.
 
@@ -141,7 +144,26 @@ Acesse `http://localhost:3000` no seu navegador.
 
 ### 3. Projeto Pessoal / Demanda Geral
 > **Input:** *"Configurar pipeline de CI/CD com GitHub Actions para rodar testes e lint antes do merge da branch main."*  
-> **Ação:** Card estruturado na coluna de desenvolvimento, com checklist técnico focado na criação do arquivo YAML de workflow e validação dos triggers.
+> **Ação:** Card estruturado na coluna adequada ao prazo, com etiqueta *Desenvolvimento*, com checklist técnico focado na criação do arquivo YAML de workflow e validação dos triggers.
+
+---
+
+### 4. Modo rápido com `/card` (sem gastar cota do Gemini)
+Use o botão de modelo de card na interface ou cole um bloco neste formato:
+```
+/card
+Coluna: Esta Semana
+Título: [Faculdade] Relatório de Banco de Dados
+Prazo: 2026-11-05 22:00
+Etiquetas: Acadêmico / Edital / Pesquisa
+Descrição:
+**Objetivo:** Entregar o relatório final.
+Checklist:
+- Revisar diagrama ER
+- Testar script SQL
+- Enviar no portal
+```
+O prazo aceita `AAAA-MM-DD`, `DD/MM/AAAA` e horário opcional (`22:00` ou `22h`); sem horário, vale 23:59. Responda "sim" para criar.
 
 ---
 

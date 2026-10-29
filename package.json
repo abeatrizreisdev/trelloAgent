@@ -1,18 +1,31 @@
 {
   "name": "trelloagent",
   "version": "1.0.0",
-  "description": "",
+  "description": "Agente de IA (Gemini) que transforma demandas em texto livre em cartões estruturados no Trello.",
   "main": "server.mjs",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.mjs"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abeatrizreisdev/trelloAgent.git"
+  },
+  "keywords": [
+    "trello",
+    "gemini",
+    "ai-agent",
+    "kanban",
+    "express"
+  ],
+  "author": "Ana Beatriz Reis Alves",
+  "license": "MIT",
   "dependencies": {
-    "@google/genai": "^0.1.1",
+    "@google/genai": "^2.30.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
   }

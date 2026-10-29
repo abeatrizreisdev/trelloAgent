@@ -7,6 +7,7 @@
   <title>Trello AI Workspace • Pro Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -352,6 +353,22 @@
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
 
+    // Escapa texto puro antes de interpolar em HTML.
+    function escaparHTML(texto) {
+      return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // Markdown -> HTML sanitizado (bloqueia scripts e atributos on* vindos do modelo).
+    function markdownSeguro(texto) {
+      const html = DOMPurify.sanitize(marked.parse(texto), { ADD_ATTR: ["target"] });
+      return html.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
+    }
+
     function isCardProposal(texto) {
       return (
         (texto.includes("Coluna:") || texto.includes("Coluna sugerida:") || texto.includes("Pré-visualização do Card")) &&
@@ -365,10 +382,10 @@
       const dataMatch = texto.match(/(?:Data de entrega|Prazo)[^:]*\*\*?:?\s*([^\n\r]+)/i);
       const etiquetasMatch = texto.match(/Etiquetas?(?: sugeridas)?\*\*?:?\s*([^\n\r]+)/i);
 
-      const coluna = colunaMatch ? colunaMatch[1].replace(/[*_\[\]]/g, "").trim() : "Esta Semana";
-      const titulo = tituloMatch ? tituloMatch[1].replace(/[*_\[\]]/g, "").trim() : "Demanda Estruturada";
-      const prazo = dataMatch ? dataMatch[1].replace(/[*_]/g, "").trim() : "Sem prazo";
-      const etiquetas = etiquetasMatch ? etiquetasMatch[1].replace(/[*_]/g, "").trim() : "Geral";
+      const coluna = escaparHTML(colunaMatch ? colunaMatch[1].replace(/[*_\[\]]/g, "").trim() : "Esta Semana");
+      const titulo = escaparHTML(tituloMatch ? tituloMatch[1].replace(/[*_\[\]]/g, "").trim() : "Demanda Estruturada");
+      const prazo = escaparHTML(dataMatch ? dataMatch[1].replace(/[*_]/g, "").trim() : "Sem prazo");
+      const etiquetas = escaparHTML(etiquetasMatch ? etiquetasMatch[1].replace(/[*_]/g, "").trim() : "Geral");
 
       return `
         <div class="glass-card-preview rounded-2xl p-6 my-2 text-slate-100 border border-brand-500/40 shadow-2xl">
@@ -392,7 +409,7 @@
           </div>
 
           <div class="mt-5 pt-4 border-t border-white/[0.08] text-sm text-slate-200 prose-chat leading-relaxed">
-            ${marked.parse(texto)}
+            ${markdownSeguro(texto)}
           </div>
 
           <div class="mt-5 pt-4 border-t border-white/[0.1] flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -425,12 +442,12 @@
         }`;
 
       if (isUser) {
-        bolha.innerHTML = texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        bolha.innerHTML = escaparHTML(texto);
       } else if (isCardProposal(texto)) {
         bolha.innerHTML = renderizarCardPreview(texto);
         approvalBar.classList.remove("hidden"); // Ativa a barra inferior
       } else {
-        bolha.innerHTML = marked.parse(texto);
+        bolha.innerHTML = markdownSeguro(texto);
         if (texto.includes("🎉")) {
           approvalBar.classList.add("hidden"); // Oculta ao confirmar
         }
@@ -507,6 +524,8 @@
     }
 
     function limparChat() {
+      // Zera também a sessão do Gemini e qualquer card pendente no servidor.
+      fetch("/api/reset", { method: "POST" }).catch(() => {});
       container.innerHTML = `
         <div class="flex items-start gap-4 anim-enter">
           <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-300 flex items-center justify-center font-mono font-bold text-sm shrink-0 shadow-lg">
