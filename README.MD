@@ -86,6 +86,73 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
 
 ---
 
+## 🗂️ Configurando o Quadro do Trello
+
+O agente lê as colunas e etiquetas reais do seu quadro, então ele funciona com qualquer estrutura. Ainda assim, as regras de triagem foram pensadas para o modelo abaixo, inspirado no [guia de produtividade pessoal do Trello](https://www.atlassian.com/blog/trello/work-life-focus-trello-insider-guide-personal-productivity).
+
+### 1. Colunas (listas)
+Crie as listas com estes nomes (a ordem é livre):
+
+| Coluna | O que vai nela |
+|---|---|
+| **Caixa de entrada** | Ideias brutas e tudo que chega das automações, para triar depois |
+| **Hoje** | O que vence hoje |
+| **Amanhã** | O que vence amanhã (inclui os eventos da agenda, criados 24h antes) |
+| **Esta Semana** | Prazos dos próximos 2 a 7 dias |
+| **Aguardando** | Prazos acima de 7 dias ou coisas que dependem de outra pessoa |
+| **Eventos Tech** | Hackathons, congressos, simpósios e editais de eventos |
+| **Concluído** | Cards finalizados (arquive de tempos em tempos) |
+
+> Se o agente não encontrar a coluna sugerida, o card vai para a primeira lista do quadro.
+
+### 2. Etiquetas
+Cadastre as etiquetas **com nome** (etiquetas só com cor são ignoradas):
+- Estudo / Leitura
+- Desenvolvimento
+- Acadêmico / Edital / Pesquisa
+- Geral
+
+O agente só usa etiquetas que já existem no quadro e nunca cria novas.
+
+### 3. Convenções de título
+- `M: ` para reuniões e eventos da agenda (ex.: `M: Aula Semanal`)
+- `E: ` para cards que vieram de e-mail
+- `[Tema]` no início para cards criados pelo agente (ex.: `[Faculdade] Relatório de BD`)
+
+### 4. Obtendo as chaves de API
+- **TRELLO_KEY e TRELLO_TOKEN:** acesse o [portal de Power-Ups do Trello](https://trello.com/power-ups/admin), crie um Power-Up (pode ser privado, só para você), abra a aba **API key** e gere a chave. Na mesma página, use o link para gerar o **token** manualmente e autorize o acesso.
+- **TRELLO_BOARD_ID:** abra o quadro no navegador. A URL tem o formato `https://trello.com/b/AbC123xY/nome-do-quadro`, e o código `AbC123xY` serve como ID. Se preferir o ID longo, adicione `.json` ao fim da URL e copie o campo `"id"`.
+- **GEMINI_API_KEY:** gere em [Google AI Studio](https://aistudio.google.com/apikey).
+
+> ⚠️ O token do Trello dá acesso de leitura e escrita a todos os seus quadros. Nunca faça commit do arquivo `.env`.
+
+---
+
+## ⚡ Automações de Captura com Zapier (opcional)
+
+Além do agente, o quadro pode receber cards automaticamente. Estas automações rodam no Zapier, com as suas próprias contas, e são independentes deste projeto.
+
+### Gmail → Trello (e-mail com estrela vira card)
+1. No Zapier, crie um Zap com o gatilho **Gmail → New Starred Email**.
+2. Ação **Trello → Create Card**:
+   - **Board:** seu quadro · **List:** Caixa de entrada
+   - **Name:** `E: ` + Subject
+   - **Description:** corpo do e-mail e link para a mensagem
+3. Ative o Zap. A partir daí, basta marcar um e-mail com estrela para ele aparecer no quadro.
+
+### Google Agenda → Trello (evento vira card 24h antes)
+1. Crie um Zap com o gatilho **Google Calendar → Event Start** e defina **24 horas** de antecedência.
+2. Ação **Trello → Create Card**:
+   - **Board:** seu quadro · **List:** Amanhã
+   - **Name:** `M: ` + Summary (título do evento)
+   - **Due Date:** Event Begins (início do evento)
+   - **Description:** descrição, local e link da videochamada (Meet)
+3. Ative o Zap. Os eventos em que você confirma presença na agenda passam a aparecer em **Amanhã** um dia antes.
+
+> 💡 Se você tem mais de uma conta Google (ex.: um e-mail pessoal e outro de dev), duplique cada Zap e troque apenas a conta do gatilho. Todos podem apontar para o mesmo quadro. Para conferir qual Zap criou um card, veja o **Zap History** no Zapier.
+
+---
+
 ## 📦 Como Instalar e Rodar Localmente
 
 ### 1. Pré-requisitos
@@ -111,7 +178,7 @@ Crie um arquivo `.env` na raiz do projeto baseado no `.env.example`:
 cp .env.example .env
 ```
 
-Abra o arquivo `.env` e preencha com as suas chaves:
+Abra o arquivo `.env` e preencha com as suas chaves (veja como obtê-las em [Obtendo as chaves de API](#4-obtendo-as-chaves-de-api)):
 ```ini
 PORT=3000
 HOST=127.0.0.1
