@@ -68,6 +68,8 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
    • Processamento imediato em memória     passos e contexto.
    • Custo Zero de cota/tokens           • Roteamento inteligente com
    • Bypass total de rate limits           fallback dinâmico de modelos:
+             │                              - gemini-3.5-flash-lite
+             │                              - gemini-3.1-flash-lite
              │                              - gemini-2.5-flash
              │                              - gemini-2.5-pro
              │                                     │
@@ -82,7 +84,7 @@ Desenvolvi uma ponte de automação entre a demanda bruta e o quadro Kanban. Nã
 
 ### Destaques Técnicos de Implementação:
 * **Mecanismo Híbrido Anti-Rate Limit (HTTP 429):** APIs em camadas gratuitas possuem limites estritos de requisições por dia (RPD) e por minuto (RPM). O sistema conta com um parser local determinístico que intercepta mensagens iniciadas por `/card`, monta o preview e, após a confirmação, realiza a chamada REST direta para o Trello, sem consumir tokens do modelo.
-* **Pool Resiliente de Modelos:** Em caso de erro 429, 503 ou 404, o backend troca automaticamente para o próximo modelo da lista `MODELOS` em `server.mjs` (edite-a para usar os modelos com mais cota na sua conta).
+* **Pool Resiliente de Modelos:** A lista `MODELOS` em `server.mjs` prioriza os modelos *Flash-Lite*, que têm a maior cota gratuita diária. Em caso de erro 429, 503 ou 404, o backend troca automaticamente para o próximo modelo da lista. Confira os limites da sua conta no [Google AI Studio](https://aistudio.google.com/rate-limit) e reordene se necessário.
 * **Segurança local:** O servidor escuta apenas em `127.0.0.1` por padrão e o conteúdo gerado pelo modelo é sanitizado (DOMPurify) antes de ser exibido.
 * **Execução Atômica via REST:** O backend consome os endpoints oficiais da Atlassian/Trello para criar o cartão, injetar a descrição formatada em Markdown, associar etiquetas e disparar a criação de checklists associados em cadeia.
 

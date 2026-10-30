@@ -34,9 +34,13 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const MEMORIA_PATH = path.join(__dirname, "memoria.json");
 const MAX_CARDS_MEMORIA = 10;
 
+// Ordem de prioridade: primeiro os modelos com maior cota gratuita diária (Flash-Lite).
+// Em caso de 429/503/404, o backend passa automaticamente para o próximo da lista.
 const MODELOS = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
   "gemini-2.5-flash",
-  "gemini-2.5-pro", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"
+  "gemini-2.5-pro"
 ];
 let indiceModeloAtual = 0;
 let chatSession = null;
