@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <!-- card -->
+  <rect x="11" y="16" width="34" height="38" rx="6" fill="#06080F"/>
+  <!-- checklist rows -->
+  <path d="M17 26.5l2.6 2.6 4.6-5" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="28" y="25" width="11" height="3.2" rx="1.6" fill="#34d399"/>
+  <path d="M17 36.5l2.6 2.6 4.6-5" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="28" y="35" width="11" height="3.2" rx="1.6" fill="#34d399"/>
+  <rect x="17" y="44.5" width="7" height="3.2" rx="1.6" fill="#1f2937"/>
+  <rect x="28" y="44.5" width="8" height="3.2" rx="1.6" fill="#1f2937"/>
+  <!-- AI spark -->
+  <path d="M47 6c.9 5.2 2.8 7.1 8 8-5.2.9-7.1 2.8-8 8-.9-5.2-2.8-7.1-8-8 5.2-.9 7.1-2.8 8-8z" fill="#ffffff"/>
+  <circle cx="56" cy="25" r="2.2" fill="#ffffff" opacity=".85"/>
+</svg>

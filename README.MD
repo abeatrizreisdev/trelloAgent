@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" alt="Logo do Trello AI Agent" width="120">
+</p>
+
 # 📌 Trello AI Agent: Central Autônoma de Gestão e Execução Pessoal
 
 > Um assistente inteligente full-stack em Node.js integrado à IA generativa do Google (Gemini) e à API REST do Trello, concebido para atuar como central unificada de triagem para a minha rotina — transformando briefings, e-mails, demandas acadêmicas, vagas e editais em cartões acionáveis com prazos, etiquetas e checklists atômicos.
